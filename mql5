@@ -1,0 +1,68 @@
+
+// Program Name: Price Action Toolkit
+// Developer's Site: forexroboteasy.com
+// Developer's Name: Forex Robot Easy Team
+
+// Include necessary libraries
+#include <Trade\Trade.mqh>
+#include <Pattern\Pattern.mqh>
+
+// Define global variables
+input double RiskPercentage = 2; // Percentage risk of account
+input double StopLossDistance = 50; // Distance to the stop loss
+input int FastButtonX = 10; // X coordinate of fast trade execution buttons
+input int FastButtonY = 20; // Y coordinate of fast trade execution buttons
+
+// Create instance of Trade class
+Trade trade;
+
+// Create instance of Pattern class
+Pattern pattern;
+
+// Initialize function
+int OnInit()
+{
+    // Enable risk-based entry functionality
+    trade.SetRiskPercentage(RiskPercentage);
+
+    // Calculate lot size based on risk and stop loss distance
+    double lotSize = trade.CalculateLotSize(AccountBalance(), StopLossDistance);
+
+    // Display necessary trade information
+    Print('Lot Size: ', lotSize);
+    Print('Stop Loss Distance: ', StopLossDistance);
+
+    // Identify candlestick patterns on the chart
+    pattern.FindCandlestickPatterns();
+
+    // Add fast trade execution buttons on the chart
+    trade.CreateFastTradeButtons(FastButtonX, FastButtonY);
+
+    return(INIT_SUCCEEDED);
+}
+
+// Start function
+void OnStart()
+{
+    // Move stop loss to breakeven
+    trade.MoveStopLossToBreakeven();
+
+    // Place buy and sell stops
+    trade.PlaceBuyStops();
+    trade.PlaceSellStops();
+
+    // Close out the most profitable position
+    trade.CloseMostProfitablePosition();
+
+    // Display current profit/loss
+    double profitLoss = trade.GetProfitLoss();
+    Print('Current Profit/Loss: ', profitLoss);
+}
+
+// Deinitialization function
+void OnDeinit(const int reason)
+{
+    // Clean up and release resources
+    trade.Cleanup();
+    pattern.Cleanup();
+}
